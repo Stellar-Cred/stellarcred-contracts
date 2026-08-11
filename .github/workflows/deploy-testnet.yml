@@ -8,9 +8,6 @@ on:
 env:
   CARGO_TERM_COLOR: always
 
-permissions:
-  contents: write
-
 jobs:
   deploy:
     name: Build & deploy to Stellar testnet
@@ -64,20 +61,27 @@ jobs:
           fi
           echo "contract_id=$CONTRACT_ID" >> "$GITHUB_OUTPUT"
 
-      - name: Record deployment
+      - name: Write deployment record
         run: |
-          cat <<EOF > deployments/testnet.json
+          mkdir -p /tmp/deployment
+          cat <<EOF > /tmp/deployment/testnet.json
           {
             "CredContract": "${{ steps.deploy.outputs.contract_id }}",
             "network": "testnet",
             "deployedAt": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
           }
           EOF
+          {
+            echo "### Deployed to Stellar testnet :rocket:"
+            echo ""
+            echo "**Contract ID:** \`${{ steps.deploy.outputs.contract_id }}\`"
+            echo ""
+            echo "[View on Stellar Expert](https://stellar.expert/explorer/testnet/contract/${{ steps.deploy.outputs.contract_id }})"
+          } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Commit deployment record
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add deployments/testnet.json
-          git diff --staged --quiet || git commit -m "chore: record testnet deployment"
-          git push
+      - name: Upload deployment record artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: testnet-deployment
+          path: /tmp/deployment/testnet.json
+          retention-days: 90

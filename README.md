@@ -91,9 +91,14 @@ cargo build --target wasm32v1-none --release -p cred
 
 ## Testnet Deployment
 
-The `deploy-testnet` GitHub Actions workflow builds the contract, deploys it
-to Stellar testnet via the Stellar CLI, and records the resulting contract
-ID in [`deployments/testnet.json`](deployments/testnet.json).
+The `deploy-testnet` GitHub Actions workflow builds the contract and deploys
+it to Stellar testnet on every push to `main`, using a fresh, disposable
+Friendbot-funded account as both deployer and initial admin. The resulting
+contract ID is posted to that run's job summary and uploaded as a
+`testnet-deployment` workflow artifact — it does not get committed back to
+the repo. [`deployments/testnet.json`](deployments/testnet.json) is a local
+template only; fill it in yourself after a manual deploy if you want a
+checked-in record.
 
 To deploy manually:
 
