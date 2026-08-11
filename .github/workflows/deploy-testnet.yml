@@ -42,11 +42,23 @@ jobs:
       - name: Deploy contract
         id: deploy
         run: |
-          CONTRACT_ID=$(stellar contract deploy \
-            --wasm target/wasm32v1-none/release/cred.wasm \
-            --source deployer \
-            --network testnet \
-            -- --admin $(stellar keys address deployer))
+          # Friendbot reports success as soon as the funding tx is submitted,
+          # but the RPC endpoint used by `contract deploy` can lag a few
+          # seconds before it reflects the new account. Retry on failure.
+          CONTRACT_ID=""
+          for i in $(seq 1 6); do
+            CONTRACT_ID=$(stellar contract deploy \
+              --wasm target/wasm32v1-none/release/cred.wasm \
+              --source deployer \
+              --network testnet \
+              -- --admin $(stellar keys address deployer)) && break
+            echo "Deploy attempt $i failed, retrying in 5s..."
+            sleep 5
+          done
+          if [ -z "$CONTRACT_ID" ]; then
+            echo "Deployment failed after retries" >&2
+            exit 1
+          fi
           echo "contract_id=$CONTRACT_ID" >> "$GITHUB_OUTPUT"
 
       - name: Record deployment
