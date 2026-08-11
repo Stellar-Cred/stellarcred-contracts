@@ -59,7 +59,7 @@ entirely, with `set_credential_weight()`.
 ```bash
 git clone git@github.com:Stellar-Cred/stellarcred-contracts.git
 cd stellarcred-contracts
-rustup target add wasm32-unknown-unknown
+rustup target add wasm32v1-none
 
 # Run the unit test suite
 cargo test
@@ -68,7 +68,7 @@ cargo test
 cargo clippy --all-targets -- -D warnings
 
 # Build the optimized wasm binary
-cargo build --target wasm32-unknown-unknown --release -p cred
+cargo build --target wasm32v1-none --release -p cred
 ```
 
 ## Contract Functions
@@ -101,7 +101,7 @@ To deploy manually:
 stellar contract build
 stellar keys generate deployer --network testnet --fund
 stellar contract deploy \
-  --wasm target/wasm32-unknown-unknown/release/cred.wasm \
+  --wasm target/wasm32v1-none/release/cred.wasm \
   --source deployer \
   --network testnet \
   -- --admin $(stellar keys address deployer)
