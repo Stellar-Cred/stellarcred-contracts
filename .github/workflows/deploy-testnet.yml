@@ -24,7 +24,7 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: Install Stellar CLI
-        run: cargo install --locked stellar-cli --features opt
+        uses: stellar/stellar-cli@v27.1.0
 
       - name: Build contract
         run: stellar contract build
