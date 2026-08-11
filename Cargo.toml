@@ -1,0 +1,29 @@
+[workspace]
+resolver = "2"
+members = ["contracts/cred"]
+
+[workspace.dependencies]
+soroban-sdk = { version = "=22.0.0" }
+
+# NOTE: Cargo.lock pins the transitive `ed25519-dalek` dependency (pulled in
+# by soroban-env-host's `testutils` feature) to 2.2.0 via
+# `cargo update -p ed25519-dalek@3.0.0 --precise 2.2.0`. soroban-env-host
+# 22.1.0's builtin_contracts/testutils.rs does not yet compile against
+# ed25519-dalek 3.0.0's redesigned rand_core traits, and its own Cargo.toml
+# does not cap that dependency, so an un-pinned `cargo update` will re-select
+# 3.0.0 and break `cargo test`. Do not delete Cargo.lock; if you need to
+# regenerate it, re-run the precise pin above afterward.
+
+[profile.release]
+opt-level = "z"
+overflow-checks = true
+debug = 0
+strip = "symbols"
+debug-assertions = false
+panic = "abort"
+codegen-units = 1
+lto = true
+
+[profile.release-with-logs]
+inherits = "release"
+debug-assertions = true

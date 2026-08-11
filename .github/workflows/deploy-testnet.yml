@@ -1,0 +1,68 @@
+name: deploy-testnet
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  deploy:
+    name: Build & deploy to Stellar testnet
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Cache cargo registry and build artifacts
+        uses: Swatinem/rust-cache@v2
+
+      - name: Install Stellar CLI
+        run: cargo install --locked stellar-cli --features opt
+
+      - name: Build contract
+        run: stellar contract build
+
+      - name: Configure testnet network
+        run: |
+          stellar network add testnet \
+            --rpc-url https://soroban-testnet.stellar.org:443 \
+            --network-passphrase "Test SDF Network ; September 2015" || true
+
+      - name: Fund deployer identity
+        run: |
+          stellar keys generate deployer --network testnet --fund || true
+
+      - name: Deploy contract
+        id: deploy
+        run: |
+          CONTRACT_ID=$(stellar contract deploy \
+            --wasm target/wasm32-unknown-unknown/release/cred.wasm \
+            --source deployer \
+            --network testnet \
+            -- --admin $(stellar keys address deployer))
+          echo "contract_id=$CONTRACT_ID" >> "$GITHUB_OUTPUT"
+
+      - name: Record deployment
+        run: |
+          cat <<EOF > deployments/testnet.json
+          {
+            "CredContract": "${{ steps.deploy.outputs.contract_id }}",
+            "network": "testnet",
+            "deployedAt": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          }
+          EOF
+
+      - name: Commit deployment record
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add deployments/testnet.json
+          git diff --staged --quiet || git commit -m "chore: record testnet deployment"
+          git push

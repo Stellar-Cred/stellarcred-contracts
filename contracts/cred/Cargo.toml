@@ -1,0 +1,20 @@
+[package]
+name = "cred"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "StellarCred on-chain behavioral reputation and credential contract"
+repository = "https://github.com/Stellar-Cred/stellarcred-contracts"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+doctest = false
+
+[dependencies]
+soroban-sdk = { workspace = true }
+
+[dev-dependencies]
+soroban-sdk = { workspace = true, features = ["testutils"] }
+
+[features]
+testutils = ["soroban-sdk/testutils"]
