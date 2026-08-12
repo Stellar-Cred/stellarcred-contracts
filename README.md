@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/logo.png" alt="StellarCred logo" width="120">
+</p>
+
 # StellarCred Contracts
 
 **On-chain behavioral reputation and credential protocol on Stellar Soroban**
@@ -7,6 +11,8 @@
 ![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
 ![Stellar Network](https://img.shields.io/badge/Stellar-Network-08B5E5?logo=stellar)
 ![Drips Wave](https://img.shields.io/badge/Drips-Wave-F59E0B)
+
+**Live app:** [stellarcred-app.vercel.app](https://stellarcred-app.vercel.app/)
 
 ## What is StellarCred
 
